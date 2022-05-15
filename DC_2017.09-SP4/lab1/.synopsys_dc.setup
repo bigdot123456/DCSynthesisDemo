@@ -38,7 +38,8 @@ suppress_message {LINT-1 LINT-28 LINT-32 LINT-33 DCT-228}
 #  Additional Setup Files
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-source common_setup.tcl
+source common_setup_ok.tcl
+# source common_setup.tcl
 source dc_setup.tcl
 
 
