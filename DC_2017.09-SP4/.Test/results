@@ -1,0 +1,19 @@
+Design Compiler: RTL Synthesis Installation Test
+
+Test 1a PASSED:   All files are installed 
+Test 1b PASSED:   Files are consistent
+Test 2a FAILED:   wrong version: dc_shell-t
+  Version NEEDED: 2017.09-SP4  (N-2017.09-SP4)
+Test 2b FAILED:   wrong version: fm_shell
+  Version NEEDED: 2017.09-SP4  (N-2017.09-SP4)
+
+  *******************************************************
+  * Recommended Suggestions for Corrections of FAILURES *
+  *******************************************************
+
+  1. Make sure the class materials installed correctly.    
+
+  2. Make sure the required executables are in your path.
+
+     Have a look at the tool log files in .Test/
+ Installation Test FAILS for Design Compiler: RTL Synthesis workshop

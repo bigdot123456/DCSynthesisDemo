@@ -1,0 +1,161 @@
+#!/bin/bash
+#
+#
+# Test script for the Design Compiler: RTL Synthesis workshop
+#
+###############################################################
+#
+# Check if we are supposed to perform GUI test as well
+test_gui=0
+if [[ $# == 1 ]]; then
+        if [[ "$1" == "-gui" ]]; then
+		test_gui=1
+	fi
+fi
+#
+#
+###############################################################
+
+###############################################################
+#
+#
+echo " "
+echo " ******************************************************"
+echo " Running the Synopsys Workshop Installation Test Script"
+echo " "
+echo "       Course Name:    Design Compiler: RTL Synthesis"
+echo "       Course Version: 2017.09-SP4"
+echo "       Last Update:    2018-05-02"
+echo " ******************************************************"
+echo ""
+
+/bin/rm -rf .Test
+mkdir .Test
+results=".Test/results"
+echo Design Compiler: RTL Synthesis Installation Test > $results
+echo >> $results
+
+LANG=C
+LC_ALL=C
+export LANG LC_ALL
+
+sha_files_pattern="lab* ref alib-52"
+sha_content_pattern="ref/libs/tech/* ref/libs/tlup/* ref/libs/mw_lib/*/FRAM/* lab*"
+echo " Running  Test 1 - installation integrity check"
+sum=`find $sha_files_pattern -type f -follow | sort | sha1sum | awk '{print $1}'`
+if [ "$sum" = "ef235428b9815806f78a86b182a640e9d8048cd8" ]
+then
+    echo "Test 1a PASSED:   All files are installed "  >> $results
+else
+    echo "Test 1a FAILED:   There are files missing in the installation " | tee -a $results
+    echo "" | tee -a $results
+fi
+sum=`cat $sha_content_pattern | sha1sum | awk '{print $1}'`
+if [ "$sum" = "12b0785a2c954c0734a30264bb1887af0a263b1e" ]
+then
+    echo "Test 1b PASSED:   Files are consistent"  >> $results
+else
+    echo "Test 1b FAILED:   File consistency problems found" | tee -a $results
+    echo "" | tee -a $results
+fi
+
+cd .Test
+results="./results"
+tmpout=/tmp/tmpout$$
+echo "exit" > exit.cmd
+
+echo " Running  Test 2 - testing executables"
+type dc_shell-t 1>$tmpout 2>&1
+if [ ! -z "`grep 'not found' $tmpout`" ]
+then
+    echo "Test 2a FAILED:   Cannot locate dc_shell-t executable in current search path" | tee -a $results
+else
+    location=`cat $tmpout`
+	# Now execute the tool, and check the version
+	echo "     2a  running dc_shell-t ..."
+	dc_shell-t -x exit  1>dc.log 2>&1
+	echo >> dc.log
+	ver=`grep -P 'N-2017.09-SP4(\s|\.|$)' dc.log`
+	if [ "$ver" = "" ]
+    then
+        echo "Test 2a FAILED:   wrong version: dc_shell-t" | tee -a $results
+		echo "  Version NEEDED: 2017.09-SP4  (N-2017.09-SP4)" >> $results
+    elif [ "`awk '/No such file/ {print "NOTHING"}' dc.log`" = "NOTHING" ]
+    then
+        echo "Test 2a FAILED:   Cannot locate dc_shell-t" | tee -a $results
+	else
+        echo "Test 2a PASSED:   $location" >> $results
+    fi
+fi
+
+type fm_shell 1>$tmpout 2>&1
+if [ ! -z "`grep 'not found' $tmpout`" ]
+then
+    echo "Test 2b FAILED:   Cannot locate fm_shell executable in current search path" | tee -a $results
+else
+    location=`cat $tmpout`
+	# Now execute the tool, and check the version
+	echo "     2b  running fm_shell ..."
+	fm_shell -x exit  1>fm.log 2>&1
+	echo >> fm.log
+	ver=`grep -P 'N-2017.09-SP4(\s|\.|$)' fm.log`
+	if [ "$ver" = "" ]
+    then
+        echo "Test 2b FAILED:   wrong version: fm_shell" | tee -a $results
+		echo "  Version NEEDED: 2017.09-SP4  (N-2017.09-SP4)" >> $results
+    elif [ "`awk '/No such file/ {print "NOTHING"}' fm.log`" = "NOTHING" ]
+    then
+        echo "Test 2b FAILED:   Cannot locate fm_shell" | tee -a $results
+	else
+        echo "Test 2b PASSED:   $location" >> $results
+    fi
+fi
+
+if [ "$test_gui" = "1" ]
+then
+    echo " Running  Test 3 - testing GUIs"
+else
+    echo " Skipping Test 3 - GUI"
+fi
+# GUI tests here
+if [ "$test_gui" = "1" ]
+then
+    echo "     3a  running design_vision in GUI mode..."
+	echo "        -> Please use the GUI to exit the tool"
+	echo "           The test is successful if you see the GUI!"
+    design_vision 
+fi
+
+# GUI tests here
+if [ "$test_gui" = "1" ]
+then
+    echo "     3b  running formality in GUI mode..."
+	echo "        -> Please use the GUI to exit the tool"
+	echo "           The test is successful if you see the GUI!"
+    formality 
+fi
+
+/bin/rm -f 
+# results reporting - if grep finds 'FAIL' it returns with 0, else 1
+grep FAIL $results >& /dev/null
+if [ "$?" = "0" ]
+then
+  echo "" >> $results
+  echo "  *******************************************************" >> $results
+  echo "  * Recommended Suggestions for Corrections of FAILURES *" >> $results
+  echo "  *******************************************************" >> $results
+  echo "" >> $results
+  echo "  1. Make sure the class materials installed correctly.    " >> $results
+  echo "" >> $results
+  echo "  2. Make sure the required executables are in your path." >> $results
+  echo "" >> $results
+  echo "     Have a look at the tool log files in .Test/" >> $results
+  echo ""
+  echo " Installation Test FAILS for Design Compiler: RTL Synthesis workshop" | tee -a $results
+  echo " For details execute: cat .Test/results"
+else
+  echo ""
+  echo " Installation Test PASSED for Design Compiler: RTL Synthesis workshop" | tee -a $results
+  echo ""
+fi
+cd ..
