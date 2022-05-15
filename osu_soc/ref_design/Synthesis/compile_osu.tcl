@@ -10,7 +10,7 @@
 set my_verilog_files [list basic_components.v  cla16.v  multi.v  multiplyadd.v]
 
 #/* Top-level Module                               */
-set my_toplevel cla16
+set my_toplevel multiplyadd
 
 #/* The name of the clock pin. If no clock-pin     */
 #/* exists, pick anything                          */
@@ -29,7 +29,8 @@ set my_output_delay_ns 0.1
 #/**************************************************/
 #/* No modifications needed below                  */
 #/**************************************************/
-set OSU_FREEPDK [format "%s%s"  [getenv "PDK_DIR"] "/osu_soc/lib/files"]
+#set OSU_FREEPDK [format "%s%s"  [getenv "PDK_DIR"] "/osu_soc/lib/files"]
+set OSU_FREEPDK  "/mnt/d/git/DCSynthesisDemo/osu_soc/lib/files"
 set search_path [concat  $search_path $OSU_FREEPDK]
 set alib_library_analysis_path $OSU_FREEPDK
 
@@ -78,7 +79,14 @@ set filename [format "%s%s"  $my_toplevel ".sdc"]
 write_sdc $filename
 
 set filename [format "%s%s"  $my_toplevel ".db"]
-write -f db -hier -output $filename -xg_force_db
+#write -f db -hier -output $filename -xg_force_db
+
+#write -f db -hier -output $filename
+
+# output netlist and sdc
+change_names -rules verilog
+write_file -format verilog -hierarchy -output ${my_toplevel}_syn.v
+write_sdc -nosplit ${my_toplevel}_syn.sdc
 
 redirect timing.rep { report_timing }
 redirect cell.rep { report_cell }
